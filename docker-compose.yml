@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # API Gateway
+  api-gateway:
+    build:
+      context: .
+      target: api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - user-service
+      - booking-service
+      - payment-service
+      - notification-service
+    networks:
+      - microservices-network
+
+  # User Service
+  user-service:
+    build:
+      context: .
+      target: user-service
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+    volumes:
+      - user-data:/app
+    networks:
+      - microservices-network
+
+  # Booking Service
+  booking-service:
+    build:
+      context: .
+      target: booking-service
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - booking-data:/app
+    networks:
+      - microservices-network
+
+  # Payment Service
+  payment-service:
+    build:
+      context: .
+      target: payment-service
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - payment-data:/app
+    networks:
+      - microservices-network
+
+  # Notification Service
+  notification-service:
+    build:
+      context: .
+      target: notification-service
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - notification-data:/app
+    networks:
+      - microservices-network
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      target: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - microservices-network
+
+volumes:
+  user-data:
+  booking-data:
+  payment-data:
+  notification-data:
+
+networks:
+  microservices-network:
+    driver: bridge
